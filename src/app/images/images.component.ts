@@ -79,12 +79,11 @@ export class ImagesComponent implements OnInit {
 
         this.preloaderSub = this.preloader$
           .subscribe((images: HTMLImageElement[]) => {
-              this.onInitLoading = false;
               this.renderImages(images);
           });
         // start fetching images
         this.images$.next();
-
+        // onInit flag to prevent loading on immediate scroll event fire
         this.onInitLoading = true;
 
     }
@@ -95,16 +94,17 @@ export class ImagesComponent implements OnInit {
 
         const isLoadedEnough = !isPreloadedEnough && this.items.length > this.config.itemsOnPage * 2;
 
+        // preloaded data is enough, send images direct to render
         if (isPreloadedEnough) {
-            // send images direct to render
+
             this.preloader$.next(this.preloadedImages.slice(0, this.config.itemsOnPage));
             // remove rendered items from cache
             this.preloadedImages = this.preloadedImages.slice(this.config.itemsOnPage);
             return Observable.never();
         }
 
+        // loaded data is enough, perform preloading of images
         if (isLoadedEnough) {
-            // loaded data is enough, perform preloading of images
             const itemsToPreload = this.items.slice(0, this.config.itemsOnPage * 2);
             // we don't need items we are going to preload anymore
             this.items = this.items.slice(this.config.itemsOnPage * 2);
@@ -115,7 +115,7 @@ export class ImagesComponent implements OnInit {
         return this.ImagesService.getImages(pageId)
           .switchMap((data: IMockBackendResponse) => {
 
-              console.log('Retrieved ' + data.items.length + ' images with pageId ' + data.pageId);
+              console.log(`Retrieved ${data.items.length} images with pageId ${data.pageId}`);
 
               this.pageId = data.pageId;
 
@@ -191,6 +191,11 @@ export class ImagesComponent implements OnInit {
             // add or render new images when scroll is near bottom
             if (isScrollNearBottom && !this.onInitLoading) {
                 this.images$.next(this.pageId);
+            }
+
+            if (this.onInitLoading) {
+                (event.target as Document).body.scrollTop = 0;
+                this.onInitLoading = false;
             }
         }
 
