@@ -1,4 +1,4 @@
-import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, inject, TestBed, fakeAsync } from '@angular/core/testing';
 
 import { ImagesComponent } from './images.component';
 import { MockBackendService } from '../mock/mock.service';
@@ -8,6 +8,7 @@ import { BaseRequestOptions, Http } from '@angular/http';
 import { ImagesService } from './images.service';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
+import { tick } from "@angular/core/testing";
 
 describe('ImagesComponent', () => {
   let component: ImagesComponent;
@@ -44,7 +45,7 @@ describe('ImagesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should fetch images on init', () => {
+  it('should fetch images on init', fakeAsync(() => {
 
     const service = fixture.debugElement.injector.get(ImagesService);
 
@@ -55,65 +56,17 @@ describe('ImagesComponent', () => {
       pageId: 'randomString'
     };
 
-    spyOn(service, 'getImages').and.returnValue(
-      Observable.of(stub)
-    );
+    spyOn(component.images$, 'next').and.returnValue(null);
+
+    spyOn(component, 'getImages').and.returnValue(Observable.of(stub));
 
     component.ngOnInit();
 
     fixture.detectChanges();
 
-    expect(service.getImages).toHaveBeenCalled();
-    expect(component.items).toEqual(stub);
-  });
+    tick(100);
 
-  it('should create preloaded images elements', () => {
-    const service = fixture.debugElement.injector.get(ImagesService);
-
-    const stub = {
-      items: [
-        'https://unsplash.it/400/400/?random',
-        'https://unsplash.it/400/400/?random'
-      ],
-      pageId: 'randomString'
-    };
-
-    spyOn(service, 'getImages').and.returnValue(
-      Observable.of(stub)
-    );
-
-    component.ngOnInit();
-
-    fixture.detectChanges();
-
-    expect(component.preloadedImages.length).toEqual(2);
-    expect(component.preloadedImages[0].width).toEqual(400);
-    expect(component.preloadedImages[0].height).toEqual(400);
-    expect(component.preloadedImages[1].src).toEqual('https://unsplash.it/400/400/?random');
-
-  });
-
-  it('should create images elements based on config values', inject([APP_CONFIG],(config: IConfig) => {
-    const service = fixture.debugElement.injector.get(ImagesService);
-
-    const stub = {
-      items: [
-        'https://unsplash.it/300/3300/?random',
-        'https://unsplash.it/0/2321300/?random'
-      ],
-      pageId: 'randomString'
-    };
-
-    spyOn(service, 'getImages').and.returnValue(
-      Observable.of(stub)
-    );
-
-    component.ngOnInit();
-
-    fixture.detectChanges();
-
-    expect(component.preloadedImages[0].width).toEqual(config.defaultImageSizeX);
-    expect(component.preloadedImages[1].height).toEqual(config.defaultImageSizeY);
+    expect(component.images$.next).toHaveBeenCalled();
 
   }));
 

@@ -22,11 +22,11 @@ describe('MockService', () => {
     expect(service).toBeTruthy();
   }));
 
-  it('should create correct image api url', inject([MockBackendService], (service: MockBackendService) => {
-    expect(service.getRandomImageUrl()).toEqual(`https://unsplash.it/400/400/?random`);
-    expect(service.getRandomImageUrl(300, 200)).toEqual(`https://unsplash.it/300/200/?random`);
-    expect(service.getRandomImageUrl(0, 0)).toEqual(`https://unsplash.it/400/400/?random`);
-    expect(service.getRandomImageUrl(-200, -300)).toEqual(`https://unsplash.it/400/400/?random`);
+  it('should create correct image api url', inject([MockBackendService, APP_CONFIG], (service: MockBackendService, config: IConfig) => {
+    expect(service.getRandomImageUrl().includes(`http://lorempixel.com/${config.defaultImageSizeX}/${config.defaultImageSizeY}?random`)).toBeTruthy();
+    expect(service.getRandomImageUrl(300, 200).includes(`http://lorempixel.com/${config.defaultImageSizeX}/${config.defaultImageSizeY}?random`)).toBeTruthy();
+    expect(service.getRandomImageUrl(0, 0).includes(`http://lorempixel.com/${config.defaultImageSizeX}/${config.defaultImageSizeY}?random`)).toBeTruthy();
+    expect(service.getRandomImageUrl(-200, -300).includes(`http://lorempixel.com/${config.defaultImageSizeX}/${config.defaultImageSizeY}?random`)).toBeTruthy();
   }));
 
   it('should generate response', inject([MockBackendService], (service: MockBackendService) => {

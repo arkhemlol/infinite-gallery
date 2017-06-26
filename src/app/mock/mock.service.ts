@@ -56,11 +56,11 @@ export class MockBackendService {
   public getRandomImageUrl(sizeX: number = this.config.defaultImageSizeX, sizeY: number = this.config.defaultImageSizeY) {
 
     if (!isNumber(sizeX) || sizeX <= 0) {
-      sizeX = 400;
+      sizeX = this.config.defaultImageSizeX;
     }
 
     if (!isNumber(sizeY) || sizeY <= 0) {
-      sizeY = 400;
+      sizeY = this.config.defaultImageSizeY;
     }
 
     return this.config.imageApiUrl.replace(/{x}/g, sizeX.toFixed(0)).replace(/{y}/g, sizeY.toFixed(0)) +
